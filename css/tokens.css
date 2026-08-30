@@ -1,0 +1,102 @@
+/* Hallmark · macrostructure: Split Studio · H2 Split Diptych hero knobs: ratio=7/5, right=photo, divider=negative-space
+ * theme: custom · vibe: "industrial precision, trustworthy, spec-sheet clean" · paper: oklch(98.5% 0.006 258) · accent: oklch(72% 0.14 85)
+ * display: Space Grotesk · body: IBM Plex Sans · axes: light / geometric-sans / chromatic-amber (~85°)
+ * studied: no · context: explicit · genre: modern-minimal · nav: N1b · footer: Ft1 · v1.1.0
+ */
+
+:root {
+  /* ---- Colour — custom navy/gold, tinted OKLCH ---- */
+  --color-paper:      oklch(98.5% 0.006 258);
+  --color-paper-2:    oklch(96%   0.008 258);
+  --color-paper-3:    oklch(93%   0.010 258);
+
+  --color-ink:        oklch(20%   0.045 258);
+  --color-ink-2:      oklch(38%   0.035 258);
+
+  --color-rule:       oklch(88%   0.012 258);
+  --color-rule-2:     oklch(92%   0.008 258);
+
+  --color-muted:      oklch(50%   0.020 258);
+  --color-neutral:    oklch(45%   0.020 258);
+
+  --color-accent:      oklch(72%   0.140 85);
+  --color-accent-2:    oklch(80%   0.110 85);
+  --color-accent-ink:  var(--color-ink);
+  --color-accent-text: oklch(42%   0.140 85); /* accent hue, darkened for text/border use — passes 4.5:1 on paper */
+  --color-focus:       oklch(42%   0.160 85); /* darkened from the raw accent so the ring clears 3:1 on both paper and accent fills */
+
+  --color-success:    oklch(58%   0.140 150);
+
+  /* ---- WhatsApp brand green — used only on WhatsApp-labelled buttons ---- */
+  --color-whatsapp:       #25d366;
+  --color-whatsapp-text:  #0c6b34; /* darkened, for borders/text use — clears 4.5:1 on paper */
+  --color-whatsapp-hover: #1eb85a;
+
+  /* ---- Type ---- */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  --font-gu:      "Noto Sans Gujarati", "IBM Plex Sans", sans-serif;
+
+  --text-xs:   0.72rem;
+  --text-sm:   0.85rem;
+  --text-base: 1rem;
+  --text-md:   1.2rem;
+  --text-lg:   1.44rem;
+  --text-xl:   1.9rem;
+  --text-2xl:  2.4rem;
+  --text-3xl:  3rem;
+  --text-display:   clamp(2.5rem, 4.4vw + 1rem, 4.6rem);
+  --text-display-s: clamp(2rem, 2.6vw + 1rem, 3.1rem);
+
+  /* ---- Space (4pt scale) ---- */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  /* ---- Layout ---- */
+  --page-max:    76rem;
+  --page-gutter: clamp(1.25rem, 4vw, 3rem);
+  --measure:     65ch;
+
+  /* ---- Radius ---- */
+  --radius-sm:   4px;
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  /* ---- Rules ---- */
+  --rule-hair: 1px;
+
+  /* ---- Shadows (ink-tinted, never a raw un-tokenised colour) ---- */
+  --shadow-nav:    0 8px 24px -18px oklch(20% 0.03 258 / 0.35);
+  --shadow-sticky: 0 10px 30px -14px oklch(20% 0.03 258 / 0.35);
+
+  /* ---- Motion ---- */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long:  420ms;
+
+  /* ---- Z-index scale ---- */
+  --z-base:       1;
+  --z-raised:     10;
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-sticky-nav: 300;
+  --z-modal:      400;
+  --z-toast:      500;
+  --z-tooltip:    600;
+
+  /* ---- Sticky-header coordination ---- */
+  --banner-height: 64px;
+}
