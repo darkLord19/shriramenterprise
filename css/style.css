@@ -190,7 +190,10 @@ html[data-lang="gu"] h1, html[data-lang="gu"] h2, html[data-lang="gu"] h3 { lett
 
 .hero-split__figure { margin: 0; position: relative; }
 .hero-split__figure img {
-  width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-card);
+  /* height:auto is required — the img's height="" attribute is a presentational
+     hint that sets CSS height, and aspect-ratio only applies when height is auto. */
+  width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover;
+  border-radius: var(--radius-card);
   background: var(--color-paper-2);
 }
 .hero-split__figure figcaption {
@@ -203,11 +206,6 @@ html[data-lang="gu"] h1, html[data-lang="gu"] h2, html[data-lang="gu"] h3 { lett
 .head-hang { padding-block: 0 var(--space-2xl); text-align: left; }
 .head-hang h2 { max-width: 22ch; }
 .head-hang__lede { margin-top: var(--space-md); font-size: var(--text-md); max-width: 50ch; }
-
-.head-inline {
-  font-variant-caps: all-small-caps; letter-spacing: 0.02em; font-weight: 700; color: var(--color-ink);
-}
-html[data-lang="gu"] .head-inline { font-variant-caps: normal; text-decoration: underline; text-decoration-color: var(--color-accent-text); text-underline-offset: 3px; }
 
 .head-sticky {
   position: sticky; top: var(--banner-height); z-index: var(--z-sticky);
@@ -239,35 +237,6 @@ html[data-lang="gu"] .head-inline { font-variant-caps: normal; text-decoration: 
   transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
 }
 .product__cta:hover { border-color: var(--color-accent-text); color: var(--color-ink); }
-
-/* ============================================================
-   OEM — S4 inline lead + F4 step sequence
-   ============================================================ */
-.oem-lead {
-  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-2xl);
-  align-items: center; margin-bottom: var(--space-2xl);
-}
-.oem-lead__figure { margin: 0; }
-.oem-lead__figure img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-card); }
-.oem-intro {
-  max-width: 48ch; margin: 0; font-size: var(--text-lg); line-height: 1.5;
-}
-/* Two-column rows matching .spec-sheet (34% label / rest content) so the
-   step numbers line up with the spec-sheet labels further down the page. */
-/* padding-inline carries the section gutter (see .section--tint > *) while
-   also clearing the UA's default list indent. */
-.steps { list-style: none; margin: 0 auto; padding-block: 0; padding-inline: var(--page-gutter); display: grid; }
-.steps li {
-  display: grid; grid-template-columns: 34% minmax(0, 1fr); align-items: start;
-  padding-block: var(--space-md); border-top: 1px solid var(--color-rule);
-}
-.steps li:first-child { border-top: none; }
-.stage {
-  font-family: var(--font-mono); color: var(--color-accent-text);
-  font-size: var(--text-sm); padding-right: var(--space-lg); line-height: 1.6;
-}
-.steps h3 { font-size: var(--text-md); margin-bottom: var(--space-2xs); }
-.steps p { color: var(--color-ink-2); max-width: 56ch; }
 
 /* ============================================================
    WHY US — F3 tabular spec sheet + S5 bottom-anchored
@@ -395,8 +364,6 @@ html[data-lang="gu"] .head-inline { font-variant-caps: normal; text-decoration: 
   .faq-layout { grid-template-columns: 1fr; }
   .head-sticky { position: static; }
   .contact-grid { grid-template-columns: 1fr; }
-  .oem-lead { grid-template-columns: minmax(0, 1fr); }
-  .oem-intro { max-width: none; }
 }
 
 @media (max-width: 40rem) {
