@@ -52,8 +52,14 @@ html[data-lang="gu"] h1, html[data-lang="gu"] h2, html[data-lang="gu"] h3 { lett
 }
 
 .section { padding-block: var(--space-3xl); max-width: var(--page-max); margin-inline: auto; padding-inline: var(--page-gutter); }
-.section--tint { background: var(--color-paper-2); max-width: none; }
-.section--tint > * { max-width: var(--page-max); margin-inline: auto; }
+/* Tint sections run full-bleed, so the gutter moves onto their children.
+   With border-box, max-width + padding-inline then matches an untinted
+   .section exactly, keeping every section's content on the same x-axis. */
+.section--tint { background: var(--color-paper-2); max-width: none; padding-inline: 0; }
+.section--tint > * {
+  max-width: var(--page-max); margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
 
 /* ============================================================
    PAGE-LOAD REVEAL
@@ -214,8 +220,6 @@ html[data-lang="gu"] .head-inline { font-variant-caps: normal; text-decoration: 
 .head-stack .num-label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-accent-text); letter-spacing: 0.08em; margin: 0 0 var(--space-sm); }
 .head-stack h2 { max-width: 20ch; }
 
-.num-label--end { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--color-muted); margin-top: var(--space-xl); text-align: right; }
-
 /* ============================================================
    PRODUCTS — F6 adapted (spec line instead of price)
    ============================================================ */
@@ -226,8 +230,6 @@ html[data-lang="gu"] .head-inline { font-variant-caps: normal; text-decoration: 
 @media (hover: hover) and (pointer: fine) {
   .product:hover .product__media img { transform: scale(1.02); }
 }
-.product__media--art { display: grid; place-items: center; border: 1px dashed var(--color-rule); }
-.oem-art { width: 62%; }
 .product__name { font-size: var(--text-md); margin: 0; }
 .product__spec { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-ink-2); margin-top: var(--space-2xs); }
 .product__cta {
@@ -250,13 +252,21 @@ html[data-lang="gu"] .head-inline { font-variant-caps: normal; text-decoration: 
 .oem-intro {
   max-width: 48ch; margin: 0; font-size: var(--text-lg); line-height: 1.5;
 }
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2xl); }
+/* Two-column rows matching .spec-sheet (34% label / rest content) so the
+   step numbers line up with the spec-sheet labels further down the page. */
+/* padding-inline carries the section gutter (see .section--tint > *) while
+   also clearing the UA's default list indent. */
+.steps { list-style: none; margin: 0 auto; padding-block: 0; padding-inline: var(--page-gutter); display: grid; }
 .steps li {
-  padding-block: var(--space-lg); border-top: 1px solid var(--color-rule);
+  display: grid; grid-template-columns: 34% minmax(0, 1fr); align-items: start;
+  padding-block: var(--space-md); border-top: 1px solid var(--color-rule);
 }
 .steps li:first-child { border-top: none; }
-.stage { display: block; font-family: var(--font-mono); color: var(--color-accent-text); font-size: var(--text-sm); margin-bottom: var(--space-xs); }
-.steps h3 { margin-bottom: var(--space-xs); }
+.stage {
+  font-family: var(--font-mono); color: var(--color-accent-text);
+  font-size: var(--text-sm); padding-right: var(--space-lg); line-height: 1.6;
+}
+.steps h3 { font-size: var(--text-md); margin-bottom: var(--space-2xs); }
 .steps p { color: var(--color-ink-2); max-width: 56ch; }
 
 /* ============================================================
