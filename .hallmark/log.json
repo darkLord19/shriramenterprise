@@ -1,5 +1,12 @@
 [
   {
+    "date": "2026-09-08",
+    "macrostructure": "Catalogue",
+    "theme": "Cobalt",
+    "enrichment": "generated industrial product still",
+    "brief": "Shriram Enterprise industrial product catalogue redesign"
+  },
+  {
     "date": "2026-08-30",
     "macrostructure": "Split Studio",
     "theme": "custom",
