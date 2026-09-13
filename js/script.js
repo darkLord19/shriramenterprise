@@ -85,13 +85,13 @@
   /* ---------- Sticky bottom CTA bar ---------- */
   const stickyBar = document.getElementById("cta-sticky");
   const dismissBtn = document.getElementById("cta-sticky-dismiss");
-  const hero = document.getElementById("home");
+  const hero = document.getElementById("home") || document.getElementById("top");
   const DISMISS_KEY = "shriram-cta-dismissed";
   let dismissed = false;
   try { dismissed = sessionStorage.getItem(DISMISS_KEY) === "1"; } catch (e) { /* storage unavailable */ }
 
   let observer = null;
-  if (!dismissed && hero) {
+  if (!dismissed && hero && stickyBar) {
     observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -104,11 +104,34 @@
     observer.observe(hero);
   }
 
-  dismissBtn.addEventListener("click", () => {
-    // Stop observing first, or scrolling back past the hero re-shows a dismissed bar.
-    if (observer) observer.disconnect();
-    stickyBar.classList.remove("is-visible");
-    setTimeout(() => { stickyBar.hidden = true; }, 250);
-    try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch (e) { /* storage unavailable */ }
-  });
+  if (dismissBtn && stickyBar) {
+    dismissBtn.addEventListener("click", () => {
+      // Stop observing first, or scrolling back past the hero re-shows a dismissed bar.
+      if (observer) observer.disconnect();
+      stickyBar.classList.remove("is-visible");
+      setTimeout(() => { stickyBar.hidden = true; }, 250);
+      try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch (e) { /* storage unavailable */ }
+    });
+  }
+
+  /* ---------- 60-Color Palette Filtering ---------- */
+  const filterContainer = document.getElementById("palette-filter");
+  const swatches = document.querySelectorAll(".swatch-item");
+  if (filterContainer && swatches.length > 0) {
+    const filterBtns = filterContainer.querySelectorAll(".palette-filter__btn");
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const family = btn.dataset.family;
+        filterBtns.forEach((b) => b.classList.toggle("is-active", b === btn));
+        swatches.forEach((swatch) => {
+          if (family === "all" || swatch.dataset.family === family) {
+            swatch.classList.remove("is-hidden");
+          } else {
+            swatch.classList.add("is-hidden");
+          }
+        });
+      });
+    });
+  }
 })();
+
