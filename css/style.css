@@ -928,6 +928,38 @@ button:disabled,
   color: #008736;
   letter-spacing: 0.04em;
 }
+.ref-card__macro-inset {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+  margin-top: var(--space-sm);
+}
+.ref-card__macro-inset img {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-rule);
+}
+.ref-card__macro-text {
+  font-size: var(--text-xs);
+  line-height: 1.35;
+}
+.ref-card__macro-text strong {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-ink);
+  margin-bottom: 0.15rem;
+}
+.ref-card__macro-text p {
+  margin: 0;
+  color: var(--color-muted);
+}
 
 /* Other Types Grid */
 .other-types-section {
