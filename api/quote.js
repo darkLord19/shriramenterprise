@@ -46,7 +46,10 @@ function loginPage(error) {
   .err{color:#b3261e;font-size:.85rem;margin:-6px 0 14px}
 </style></head><body>
 <form method="post" action="/quote">
-  <h1>SHRIRAM ENTERPRISE</h1>
+  <div style="text-align:center;margin-bottom:14px">
+    <img src="/assets/images/shriram-badge.png" alt="Shriram Enterprise" style="width:58px;height:58px;border-radius:12px;display:inline-block">
+  </div>
+  <h1 style="text-align:center">SHRIRAM ENTERPRISE</h1>
   <p>Enter the password to create a quotation.</p>
   <label for="pw">Password</label>
   <input id="pw" name="password" type="password" autocomplete="current-password" autofocus required>
