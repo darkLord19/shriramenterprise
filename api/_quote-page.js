@@ -58,7 +58,7 @@ const PAGE_HTML = String.raw`<!doctype html>
       <div><label for="qValid">Valid Till</label><input id="qValid" type="date"></div>
       <div><label for="qRef">Your Ref.</label><input id="qRef"></div>
       <div><label for="buyerGst">Buyer GSTIN</label><input id="buyerGst"></div>
-      <div><label for="ourGst">Our GSTIN</label><input id="ourGst"></div>
+      <div><label for="ourGst">Our GSTIN</label><input id="ourGst" value="24BMRPT0518G1ZW"></div>
     </div>
     <div style="margin-top:12px">
       <label for="to">To (customer name and address)</label>
@@ -97,12 +97,9 @@ const PAGE_HTML = String.raw`<!doctype html>
   </section>
 
   <section>
-    <h2>Notes</h2>
-    <div class="grid" style="margin-bottom:12px">
-      <div><label for="delivery">Delivery days (fills the blank in the delivery note)</label><input id="delivery" placeholder="e.g. 15"></div>
-    </div>
-    <label for="terms">Notes (one per line):</label>
-    <textarea id="terms" rows="4"></textarea>
+    <h2>Terms &amp; Conditions</h2>
+    <label for="terms">Terms &amp; conditions (one per line, numbered automatically):</label>
+    <textarea id="terms" rows="9"></textarea>
   </section>
 
   <div class="actions">
@@ -117,8 +114,14 @@ const PAGE_HTML = String.raw`<!doctype html>
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
   var DEFAULT_TERMS = [
-    "Payment: 100% in advance, before dispatch.",
-    "Delivery: within ___ days from receipt of confirmed order and payment."
+    "GST extra as applicable, at the rate shown above.",
+    "Minimum order: 1,000 units per SKU for straps, 500 metres for tape rolls.",
+    "This quotation is valid for 7 days from the date above.",
+    "Payment: 50% in advance, 50% before dispatch.",
+    "Colours from standard factory shades VT 101 to VT 160. Custom Pantone dye-to-match quoted separately.",
+    "Rates are ex-factory, Ahmedabad. Freight and transit insurance in buyer's scope.",
+    "Goods once sold will not be taken back. We are not responsible for damage during transit.",
+    "Subject to Ahmedabad jurisdiction."
   ].join("\n");
 
   var money = function (n) {
@@ -199,7 +202,7 @@ const PAGE_HTML = String.raw`<!doctype html>
   };
 
   function resetForm() {
-    ["qRef", "buyerGst", "to", "delivery", "freight"].forEach(function (id) { $(id).value = ""; });
+    ["qRef", "buyerGst", "to", "freight"].forEach(function (id) { if ($(id)) $(id).value = ""; });
     var today = new Date();
     var valid = new Date(today.getTime() + 7 * 864e5);
     var iso = function (d) { return d.toISOString().slice(0, 10); };
@@ -208,6 +211,12 @@ const PAGE_HTML = String.raw`<!doctype html>
     $("packPct").value = 3;
     $("gstPct").value = 18;
     $("terms").value = DEFAULT_TERMS;
+    try {
+      var savedGst = localStorage.getItem("quote_our_gst");
+      $("ourGst").value = (savedGst && savedGst !== "Available on request") ? savedGst : "24BMRPT0518G1ZW";
+    } catch (e) {
+      $("ourGst").value = "24BMRPT0518G1ZW";
+    }
     BANK_FIELDS.forEach(function (f) {
       try { $(f).value = localStorage.getItem("quote_" + f) || BANK_DEFAULTS[f]; } catch (e) { $(f).value = BANK_DEFAULTS[f]; }
     });
@@ -219,7 +228,12 @@ const PAGE_HTML = String.raw`<!doctype html>
   $("reset").addEventListener("click", function () {
     if (confirm("Clear everything and start a new quotation?")) resetForm();
   });
-  try { $("ourGst").value = localStorage.getItem("quote_our_gst") || ""; } catch (e) {}
+  try {
+    var savedGst = localStorage.getItem("quote_our_gst");
+    $("ourGst").value = (savedGst && savedGst !== "Available on request") ? savedGst : "24BMRPT0518G1ZW";
+  } catch (e) {
+    $("ourGst").value = "24BMRPT0518G1ZW";
+  }
   $("ourGst").addEventListener("input", function () {
     try { localStorage.setItem("quote_our_gst", $("ourGst").value); } catch (e) {}
   });
@@ -283,12 +297,12 @@ const PAGE_HTML = String.raw`<!doctype html>
     doc.setTextColor(230, 235, 250);
     doc.setFontSize(7.5);
     doc.text("180, Mahavir Industrial Park-2, Nr. Vinayak Estate, Kathwada, Ahmedabad, Gujarat 382430", textX, y + 50);
-    doc.text("Phone / WhatsApp: +91 81607 75905  |  shriramenterprise135@gmail.com", textX, y + 61);
+    doc.text("Phone / WhatsApp: +91 81607 75905  |  shriramenterprise135@gmail.com  |  www.shriramenterprise.org", textX, y + 61);
 
-    var gstin = $("ourGst").value.trim();
+    var gstin = ($("ourGst").value || "").trim() || "24BMRPT0518G1ZW";
     doc.setTextColor(217, 171, 82);
     doc.setFont("helvetica", "bold");
-    doc.text("GSTIN: " + (gstin || "Available on request"), textX, y + 72);
+    doc.text("GSTIN: " + gstin, textX, y + 72);
     doc.setFont("helvetica", "normal");
 
     y += 84 + 10;
@@ -418,9 +432,8 @@ const PAGE_HTML = String.raw`<!doctype html>
     });
     y += tH * tl.length + 16;
 
-    // Notes
-    var termsLines = $("terms").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean)
-      .map(function (s) { return s.replace(/_{2,}/, $("delivery").value.trim() || "___"); });
+    // Terms & Conditions
+    var termsLines = $("terms").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
     doc.setFontSize(8);
     var blocks = termsLines.map(function (s) {
       var lines = doc.splitTextToSize(s, W - 40);
@@ -429,7 +442,7 @@ const PAGE_HTML = String.raw`<!doctype html>
     if (blocks.length > 0) {
       ensure(18 + blocks[0].h);
       fill(NAVY); doc.rect(L, y, W, 16, "F"); text([255, 255, 255]); doc.setFontSize(9);
-      doc.text("Notes", L + W / 2, y + 11.5, { align: "center" });
+      doc.text("Terms & Conditions", L + W / 2, y + 11.5, { align: "center" });
       y += 16;
       doc.setFontSize(8);
       blocks.forEach(function (b, i) {
