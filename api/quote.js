@@ -47,7 +47,7 @@ function loginPage(error) {
 </style></head><body>
 <form method="post" action="/quote">
   <div style="text-align:center;margin-bottom:14px">
-    <img src="/assets/images/shriram-badge.png" alt="Shriram Enterprise" style="width:58px;height:58px;border-radius:12px;display:inline-block">
+    <img src="/assets/images/shriram-emblem.png" alt="Shriram Enterprise" style="width:68px;height:auto;display:inline-block">
   </div>
   <h1 style="text-align:center">SHRIRAM ENTERPRISE</h1>
   <p>Enter the password to create a quotation.</p>
