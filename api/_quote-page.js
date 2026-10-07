@@ -41,14 +41,19 @@ const PAGE_HTML = String.raw`<!doctype html>
 </style></head><body>
 <div class="wrap">
   <header class="top">
-    <h1>Quotation Generator</h1>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:38px;height:38px;border-radius:8px;background:var(--navy);border:2px solid #d9ab52;display:grid;place-items:center;color:#d9ab52;font-family:'Times New Roman',Times,serif;font-size:24px;font-weight:700">S</div>
+      <div>
+        <h1 style="margin:0;font-size:1.25rem;letter-spacing:.02em">SHRIRAM ENTERPRISE</h1>
+        <p style="margin:0;font-size:.8rem;color:var(--muted)">Quotation Generator</p>
+      </div>
+    </div>
     <form method="post" action="/quote"><input type="hidden" name="action" value="logout"><button class="btn" type="submit">Sign out</button></form>
   </header>
 
   <section>
     <h2>Quotation details</h2>
     <div class="grid">
-      <div><label for="qNo">Quotation No.</label><input id="qNo"></div>
       <div><label for="qDate">Date</label><input id="qDate" type="date"></div>
       <div><label for="qValid">Valid Till</label><input id="qValid" type="date"></div>
       <div><label for="qRef">Your Ref.</label><input id="qRef"></div>
@@ -82,19 +87,28 @@ const PAGE_HTML = String.raw`<!doctype html>
   </section>
 
   <section>
-    <h2>Terms &amp; conditions</h2>
-    <div class="grid" style="margin-bottom:12px">
-      <div><label for="delivery">Delivery days (fills the blank in the delivery term)</label><input id="delivery" placeholder="e.g. 15"></div>
+    <h2>Bank details (for payment)</h2>
+    <div class="grid">
+      <div><label for="bankName">Bank Name</label><input id="bankName" value="Bank of India"></div>
+      <div><label for="accNo">Account Number</label><input id="accNo" value="203120110001155"></div>
+      <div><label for="ifsc">IFSC Code</label><input id="ifsc" value="BKID0002031"></div>
+      <div><label for="accName">Account Holder Name</label><input id="accName" value="SHRI RAM ENTERPRISE"></div>
     </div>
-    <label for="terms">One term per line. Numbering is added automatically.</label>
-    <textarea id="terms" rows="11"></textarea>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <div class="grid" style="margin-bottom:12px">
+      <div><label for="delivery">Delivery days (fills the blank in the delivery note)</label><input id="delivery" placeholder="e.g. 15"></div>
+    </div>
+    <label for="terms">Notes (one per line):</label>
+    <textarea id="terms" rows="4"></textarea>
   </section>
 
   <div class="actions">
     <button class="btn" id="reset" type="button">Clear form</button>
     <button class="btn primary" id="download" type="button">Download PDF</button>
   </div>
-  <p class="note" style="text-align:right">The PDF is created in your browser. Nothing is stored on the server.</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -103,16 +117,8 @@ const PAGE_HTML = String.raw`<!doctype html>
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
   var DEFAULT_TERMS = [
-    "GST extra as applicable, at the rate shown above.",
-    "Minimum order: 1,000 units per SKU for straps, 500 metres for tape rolls.",
-    "Packing charges as shown above. Special or wooden packing charged extra.",
-    "This quotation is valid for 7 days from the date above.",
     "Payment: 100% in advance, before dispatch.",
-    "Delivery: within ___ days from receipt of confirmed order and payment.",
-    "Colours from standard factory shades VT 101 to VT 160. Custom Pantone dye-to-match quoted separately.",
-    "Rates are ex-factory, Ahmedabad. Freight and transit insurance in buyer's scope.",
-    "Goods once sold will not be taken back. We are not responsible for damage during transit.",
-    "Subject to Ahmedabad jurisdiction."
+    "Delivery: within ___ days from receipt of confirmed order and payment."
   ].join("\n");
 
   var money = function (n) {
@@ -184,8 +190,16 @@ const PAGE_HTML = String.raw`<!doctype html>
   document.addEventListener("input", recalc);
 
   /* ---------- Defaults ---------- */
+  var BANK_FIELDS = ["bankName", "accNo", "ifsc", "accName"];
+  var BANK_DEFAULTS = {
+    bankName: "Bank of India",
+    accNo: "203120110001155",
+    ifsc: "BKID0002031",
+    accName: "SHRI RAM ENTERPRISE"
+  };
+
   function resetForm() {
-    ["qNo", "qRef", "buyerGst", "to", "delivery", "freight"].forEach(function (id) { $(id).value = ""; });
+    ["qRef", "buyerGst", "to", "delivery", "freight"].forEach(function (id) { $(id).value = ""; });
     var today = new Date();
     var valid = new Date(today.getTime() + 7 * 864e5);
     var iso = function (d) { return d.toISOString().slice(0, 10); };
@@ -194,6 +208,9 @@ const PAGE_HTML = String.raw`<!doctype html>
     $("packPct").value = 3;
     $("gstPct").value = 18;
     $("terms").value = DEFAULT_TERMS;
+    BANK_FIELDS.forEach(function (f) {
+      try { $(f).value = localStorage.getItem("quote_" + f) || BANK_DEFAULTS[f]; } catch (e) { $(f).value = BANK_DEFAULTS[f]; }
+    });
     rowsEl.innerHTML = "";
     for (var i = 0; i < 5; i++) addRow();
     recalc();
@@ -205,6 +222,12 @@ const PAGE_HTML = String.raw`<!doctype html>
   try { $("ourGst").value = localStorage.getItem("quote_our_gst") || ""; } catch (e) {}
   $("ourGst").addEventListener("input", function () {
     try { localStorage.setItem("quote_our_gst", $("ourGst").value); } catch (e) {}
+  });
+  BANK_FIELDS.forEach(function (f) {
+    try { $(f).value = localStorage.getItem("quote_" + f) || BANK_DEFAULTS[f]; } catch (e) { $(f).value = BANK_DEFAULTS[f]; }
+    $(f).addEventListener("input", function () {
+      try { localStorage.setItem("quote_" + f, $(f).value); } catch (e) {}
+    });
   });
   resetForm();
 
@@ -221,16 +244,53 @@ const PAGE_HTML = String.raw`<!doctype html>
     function text(c) { doc.setTextColor(c[0], c[1], c[2]); }
     function ensure(h) { if (y + h > PAGE_BOTTOM) { doc.addPage(); y = 40; return true; } return false; }
 
-    // Header band
+    // Header band with Logo
     fill(NAVY); doc.rect(L, y, W, 84, "F");
-    text([255, 255, 255]);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(20); doc.text("SHRIRAM ENTERPRISE", L + 10, y + 26);
-    doc.setFontSize(7.5); text([176, 188, 222]);
-    doc.text("Manufacturers of Nylon Webbing Straps, Hook & Loop Belts and Custom OEM Assemblies", L + 10, y + 40);
-    doc.setFontSize(8); text([255, 255, 255]);
-    doc.text("180, Mahavir Industrial Park-2, Nr. Vinayak Estate, Kathwada, Ahmedabad, Gujarat 382430", L + 10, y + 53);
-    doc.text("Phone / WhatsApp: +91 81607 75905  |  shriramenterprise135@gmail.com  |  www.shriramenterprise.org", L + 10, y + 64);
-    doc.text("GSTIN: " + $("ourGst").value, L + 10, y + 76);
+
+    // Logo Emblem (Gold & Navy Monogram Badge)
+    var logoX = L + 10, logoY = y + 14, logoSize = 56;
+    doc.setFillColor(18, 32, 72);
+    doc.setDrawColor(217, 171, 82);
+    doc.setLineWidth(1.5);
+    doc.roundedRect(logoX, logoY, logoSize, logoSize, 6, 6, "FD");
+
+    // Inner gold border
+    doc.setLineWidth(0.6);
+    doc.roundedRect(logoX + 3.5, logoY + 3.5, logoSize - 7, logoSize - 7, 4, 4, "S");
+
+    // Logo Monogram "S"
+    doc.setTextColor(217, 171, 82);
+    doc.setFont("times", "bold");
+    doc.setFontSize(30);
+    doc.text("S", logoX + logoSize / 2, logoY + 37, { align: "center" });
+
+    // Under-monogram gold strap accent
+    doc.setLineWidth(1);
+    doc.line(logoX + 16, logoY + 44, logoX + logoSize - 16, logoY + 44);
+
+    // Header Text details beside logo
+    var textX = logoX + logoSize + 14;
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("SHRIRAM ENTERPRISE", textX, y + 25);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(185, 195, 225);
+    doc.text("Manufacturers of Nylon Webbing Straps, Hook & Loop Belts & OEM Assemblies", textX, y + 38);
+
+    doc.setTextColor(230, 235, 250);
+    doc.setFontSize(7.5);
+    doc.text("180, Mahavir Industrial Park-2, Nr. Vinayak Estate, Kathwada, Ahmedabad, Gujarat 382430", textX, y + 50);
+    doc.text("Phone / WhatsApp: +91 81607 75905  |  shriramenterprise135@gmail.com", textX, y + 61);
+
+    var gstin = $("ourGst").value.trim();
+    doc.setTextColor(217, 171, 82);
+    doc.setFont("helvetica", "bold");
+    doc.text("GSTIN: " + (gstin || "Available on request"), textX, y + 72);
+    doc.setFont("helvetica", "normal");
+
     y += 84 + 10;
 
     // Quotation box
@@ -240,24 +300,25 @@ const PAGE_HTML = String.raw`<!doctype html>
     y += 20;
 
     var meta = [
-      ["Quotation No.", $("qNo").value], ["Date", fmtDate($("qDate").value)],
-      ["Valid Till", fmtDate($("qValid").value)], ["Your Ref.", $("qRef").value],
+      ["Date", fmtDate($("qDate").value)],
+      ["Valid Till", fmtDate($("qValid").value)],
+      ["Your Ref.", $("qRef").value],
       ["Buyer GSTIN", $("buyerGst").value]
     ];
-    var rowH = 14, boxH = rowH * meta.length, splitX = L + 310, valX = splitX + 70;
+    var rowH = 15, boxH = rowH * meta.length, splitX = L + 310, valX = splitX + 70;
     fill([255, 255, 255]); doc.rect(L, y, W, boxH, "S");
     doc.line(splitX, y, splitX, y + boxH);
     doc.line(valX, y, valX, y + boxH);
     fill(TINT); doc.rect(valX, y, R - valX, boxH, "F"); doc.rect(valX, y, R - valX, boxH, "S");
     text([30, 40, 70]); doc.setFontSize(8.5);
     doc.text("To,", L + 4, y + 10);
-    var toLines = doc.splitTextToSize($("to").value || "", 300 - 8).slice(0, 5);
+    var toLines = doc.splitTextToSize($("to").value || "", 300 - 8).slice(0, 4);
     toLines.forEach(function (ln, i) { doc.text(ln, L + 24, y + 10 + i * rowH); });
     meta.forEach(function (m, i) {
       var ry = y + i * rowH;
       doc.line(splitX, ry, R, ry);
-      doc.text(m[0], splitX + 4, ry + 10);
-      doc.text(String(m[1]), valX + 4, ry + 10);
+      doc.text(m[0], splitX + 4, ry + 10.5);
+      doc.text(String(m[1]), valX + 4, ry + 10.5);
     });
     y += boxH + 14;
 
@@ -318,6 +379,33 @@ const PAGE_HTML = String.raw`<!doctype html>
     ];
     var tH = 15, tX = R - 255, tMid = tX + 110, tVal = tMid + 60;
     ensure(tH * tl.length + 10);
+
+    // Bank Details (left side, alongside Totals)
+    var bW = tX - L - 12;
+    var bH = tH * tl.length;
+    fill(NAVY); doc.rect(L, y, bW, 16, "F");
+    text([255, 255, 255]); doc.setFontSize(8.5);
+    doc.text("Bank Details for Payment (RTGS / NEFT)", L + bW / 2, y + 11.5, { align: "center" });
+    doc.rect(L, y, bW, bH, "S");
+
+    var bankRows = [
+      ["Account Name:", $("accName").value || "SHRI RAM ENTERPRISE"],
+      ["Bank Name:", $("bankName").value || "Bank of India"],
+      ["Account No.:", $("accNo").value || "203120110001155"],
+      ["IFSC Code:", $("ifsc").value || "BKID0002031"]
+    ];
+    var bRowH = (bH - 16) / bankRows.length;
+    bankRows.forEach(function (br, bi) {
+      var bry = y + 16 + bi * bRowH;
+      if (bi % 2 === 1) { fill(TINT); doc.rect(L, bry, bW, bRowH, "F"); }
+      doc.rect(L, bry, bW, bRowH, "S");
+      text([85, 97, 138]); doc.setFontSize(7.5);
+      doc.text(br[0], L + 8, bry + bRowH / 2 + 3);
+      text(NAVY); doc.setFontSize(8); doc.setFont("helvetica", "bold");
+      doc.text(String(br[1]), L + 75, bry + bRowH / 2 + 3);
+      doc.setFont("helvetica", "normal");
+    });
+
     tl.forEach(function (row, i) {
       var ry = y + i * tH, last = i === tl.length - 1;
       if (last) { fill(TINT); doc.rect(tMid, ry, R - tMid, tH, "F"); }
@@ -330,7 +418,7 @@ const PAGE_HTML = String.raw`<!doctype html>
     });
     y += tH * tl.length + 16;
 
-    // Terms
+    // Notes
     var termsLines = $("terms").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean)
       .map(function (s) { return s.replace(/_{2,}/, $("delivery").value.trim() || "___"); });
     doc.setFontSize(8);
@@ -338,21 +426,23 @@ const PAGE_HTML = String.raw`<!doctype html>
       var lines = doc.splitTextToSize(s, W - 40);
       return { lines: lines, h: Math.max(13, lines.length * 10 + 4) };
     });
-    ensure(18 + (blocks[0] ? blocks[0].h : 0));
-    fill(NAVY); doc.rect(L, y, W, 16, "F"); text([255, 255, 255]); doc.setFontSize(9);
-    doc.text("Terms & Conditions", L + W / 2, y + 11.5, { align: "center" });
-    y += 16;
-    doc.setFontSize(8);
-    blocks.forEach(function (b, i) {
-      ensure(b.h);
-      if (i % 2 === 0) { fill(TINT); doc.rect(L, y, W, b.h, "F"); }
-      doc.rect(L, y, 26, b.h, "S"); doc.rect(L + 26, y, W - 26, b.h, "S");
-      text([30, 40, 70]);
-      doc.text(String(i + 1), L + 13, y + 9.5, { align: "center" });
-      b.lines.forEach(function (ln, li) { doc.text(ln, L + 32, y + 9.5 + li * 10); });
-      y += b.h;
-    });
-    y += 14;
+    if (blocks.length > 0) {
+      ensure(18 + blocks[0].h);
+      fill(NAVY); doc.rect(L, y, W, 16, "F"); text([255, 255, 255]); doc.setFontSize(9);
+      doc.text("Notes", L + W / 2, y + 11.5, { align: "center" });
+      y += 16;
+      doc.setFontSize(8);
+      blocks.forEach(function (b, i) {
+        ensure(b.h);
+        if (i % 2 === 0) { fill(TINT); doc.rect(L, y, W, b.h, "F"); }
+        doc.rect(L, y, 26, b.h, "S"); doc.rect(L + 26, y, W - 26, b.h, "S");
+        text([30, 40, 70]);
+        doc.text(String(i + 1), L + 13, y + 9.5, { align: "center" });
+        b.lines.forEach(function (ln, li) { doc.text(ln, L + 32, y + 9.5 + li * 10); });
+        y += b.h;
+      });
+      y += 14;
+    }
 
     // Footer
     ensure(60);
@@ -369,8 +459,10 @@ const PAGE_HTML = String.raw`<!doctype html>
 
   $("download").addEventListener("click", function () {
     if (!window.jspdf) { alert("PDF library did not load. Check your internet connection and try again."); return; }
-    var name = ($("qNo").value || "Quotation").replace(/[^\w.-]+/g, "_");
-    buildPdf().save("Shriram_Enterprise_Quotation_" + name + ".pdf");
+    var ref = ($("qRef").value || "").trim().replace(/[^\w.-]+/g, "_");
+    var dateStr = ($("qDate").value || "").replace(/-/g, "");
+    var suffix = ref ? "_" + ref : (dateStr ? "_" + dateStr : "");
+    buildPdf().save("Shriram_Enterprise_Quotation" + suffix + ".pdf");
   });
 })();
 </script>
